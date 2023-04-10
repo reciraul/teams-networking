@@ -9,6 +9,26 @@ function getTeamsRequest() {
 });
 }
 
+function createTeamRequest(team) {
+    fetch("http://localhost:3000/teams-json/create", {
+  method: "POST",
+  headers: {
+    "Content-Type": "application/json"
+  },
+  body: JSON.stringify(team)
+}).then((r) => r.json());
+}
+
+function deleteTeamRequest(id){
+    fetch("http://localhost:3000/teams-json/delete", {
+  method: "DELETE",
+  headers: {
+    "Content-Type": "application/json"
+  },
+  body: JSON.stringify({ id })
+});
+}
+
 function getTeamAsHTML(team){
     return `
     <tr>
@@ -16,14 +36,64 @@ function getTeamAsHTML(team){
         <td>${team.members}</td>
         <td>${team.name}</td>
         <td>${team.url}</td>
+        <td>
+          <a data-id="${team.id}">✖</a>        
+        </td>
     </tr>`;
 }
 
 function showTeams(teams) {
    const html = teams.map(getTeamAsHTML);
-   document.querySelector('table tbody').innerHTML = html.join("");
+   $('table tbody').innerHTML = html.join("");
 }
+
+function $(selector){
+    return document.querySelector(selector);
+}
+
+function formSubmit(e){
+    e.preventDefault();
+    console.warn("submit", e);
+    const promotion = $("#promotion").value;
+    const members = $("#members").value;
+    const project = $("#project").value;
+    const url = $("#url").value;
+
+    const team = {
+        promotion,
+        members,
+        project,
+        url,
+    };
+
+    createTeamRequest(team).then((status) => {
+        console.info("status", status);
+        window.location.reload();
+    });
+}
+
+function deleteTeam(id){
+    console.warn("delete", id);
+    deleteTeamRequest(id).then((status) => {
+        console.warn("status", status);
+        window.location.reload();
+    });
+};
+
+function initEvents(){
+    $("#editForm").addEventListener("submit", formSubmit)
+
+    $("table tbody").addEventListener("click", e => {
+        if(e.target.matches("a")){
+            var id = e.target.dataset.id;
+            deleteTeam(id);
+        };
+    })
+}
+
 
 getTeamsRequest().then((teams) => {
     showTeams(teams);
 });
+
+initEvents();

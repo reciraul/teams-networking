@@ -8,6 +8,7 @@
     <title>Table Teams-Network</title>
 </head>
 <body>
+    <form id="editForm" action="" method="post">
     <table id="list">
         <thead>
             <tr>
@@ -15,6 +16,7 @@
                 <th>Members</th>
                 <th>Project Name</th>
                 <th>Project URL</th>
+                <th></th>
             </tr>
         </thead>
         <tbody>
@@ -22,22 +24,25 @@
         <tfoot>
             <tr>
                 <td>
-                    <input type="text" name="" id="" placeholder="Enter promotion">
+                    <input type="text" name="promotion" id="promotion" placeholder="Enter promotion" required>
                 </td>
                 <td>
-                    <input type="text" name="" id="" placeholder="Enter members">
+                    <input type="text" name="members" id="members" placeholder="Enter members" required>
                 </td>
                 <td>
-                    <input type="text" name="" id="" placeholder="Enter project">
+                    <input type="text" name="project" id="project" placeholder="Enter project" required>
                 </td>
                 <td>
-                    <input type="text" name="" id="" placeholder="Project URL">
+                    <input type="text" name="url" id="url" placeholder="Project URL" required>
+                </td>
+                <td>
+                    <button type="submit">💾</button>
                 </td>
             </tr>
             <tr></tr>
         </tfoot>
     </table>
-
+</form>
     <script src="index.js"></script>
 </body>
 </html>
