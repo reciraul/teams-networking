@@ -10,7 +10,7 @@ function getTeamsRequest() {
 }
 
 function createTeamRequest(team) {
-    fetch("http://localhost:3000/teams-json/create", {
+  return fetch("http://localhost:3000/teams-json/create", {
   method: "POST",
   headers: {
     "Content-Type": "application/json"
@@ -20,13 +20,13 @@ function createTeamRequest(team) {
 }
 
 function deleteTeamRequest(id){
-    fetch("http://localhost:3000/teams-json/delete", {
+   return fetch("http://localhost:3000/teams-json/delete", {
   method: "DELETE",
   headers: {
     "Content-Type": "application/json"
   },
   body: JSON.stringify({ id })
-});
+}).then((r) => r.json());
 }
 
 function getTeamAsHTML(team){
@@ -62,7 +62,7 @@ function formSubmit(e){
     const team = {
         promotion,
         members,
-        project,
+        name: project,
         url,
     };
 
