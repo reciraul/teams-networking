@@ -1,3 +1,5 @@
+let allTeams = [];
+
 function getTeamsRequest() {
   return fetch("http://localhost:3000/teams-json", {
     method: "GET",
@@ -37,7 +39,8 @@ function getTeamAsHTML(team) {
         <td>${team.name}</td>
         <td>${team.url}</td>
         <td>
-          <a data-id="${team.id}">✖</a>        
+          <a data-id="${team.id}" class="link-btn remove-btn">✖</a>   
+          <a data-id="${team.id}" class="link-btn edit-btn">&#9998;</a>
         </td>
     </tr>`;
 }
@@ -56,13 +59,13 @@ function formSubmit(e) {
   console.warn("submit", e);
   const promotion = $("#promotion").value;
   const members = $("#members").value;
-  const project = $("#project").value;
+  const name = $("#name").value;
   const url = $("#url").value;
 
   const team = {
     promotion,
     members,
-    name: project,
+    name,
     url
   };
 
@@ -80,18 +83,31 @@ function deleteTeam(id) {
   });
 }
 
+function startEditTeam(id) {
+  console.warn("editTeam", id, allTeams);
+  const team = allTeams.find((team) => team.id === id);
+  $("#promotion").value = team.promotion;
+  $("#members").value = team.members;
+  $("#name").value = team.name;
+  $("#url").value = team.url;
+}
+
 function initEvents() {
   $("#editForm").addEventListener("submit", formSubmit);
 
   $("table tbody").addEventListener("click", (e) => {
-    if (e.target.matches("a")) {
-      var id = e.target.dataset.id;
+    if (e.target.matches("a.remove-btn")) {
+      const id = e.target.dataset.id;
       deleteTeam(id);
+    } else if (e.target.matches("a.edit-btn")) {
+      const id = e.target.dataset.id;
+      startEditTeam(id);
     }
   });
 }
 
 getTeamsRequest().then((teams) => {
+  allTeams = teams;
   showTeams(teams);
 });
 
