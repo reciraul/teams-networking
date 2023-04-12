@@ -1,23 +1,23 @@
 table {
-    width: 100%;
-    border-collapse: collapse;
+  width: 100%;
+  border-collapse: collapse;
 }
 
-table th, 
+table th,
 table td {
-    border: 1px solid blue;
-    padding: 5px;
+  border: 1px solid blue;
+  padding: 5px;
 }
 
-table th{
-    background-color: aquamarine;
-    color: black;
+table th {
+  background-color: aquamarine;
+  color: black;
 }
 
 table tr {
-    background-color: aliceblue;
+  background-color: aliceblue;
 }
 
 table tr:nth-child(even) {
-    background-color: aqua;
+  background-color: aqua;
 }
