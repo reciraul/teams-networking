@@ -118,6 +118,18 @@ function startEditTeam(id) {
   $("#url").value = team.url;
 }
 
+function searchTeams(search) {
+  search = search.toLowerCase();
+  return allTeams.filter((team) => {
+    if (team.members.toLowerCase().includes(search)) {
+      return true;
+    }
+    if (team.promotion.toLowerCase().includes(search)) {
+      return true;
+    }
+  });
+}
+
 function initEvents() {
   const form = $("#editForm");
   form.addEventListener("submit", formSubmit);
@@ -125,6 +137,13 @@ function initEvents() {
     console.warn("reset", editId);
     editId = undefined;
     console.warn("reset2", editId);
+  });
+
+  $("#search").addEventListener("input", (e) => {
+    const search = e.target.value;
+    console.info("search", search);
+    const teams = searchTeams(search);
+    showTeams(teams);
   });
 
   $("table tbody").addEventListener("click", (e) => {
