@@ -119,7 +119,10 @@ function formSubmit(e) {
 
         allTeams = allTeams.map((t) => {
           if (t.id === team.id) {
-            return team;
+            return {
+              ...t, // old props;
+              ...team
+            };
           }
           return t;
         });
