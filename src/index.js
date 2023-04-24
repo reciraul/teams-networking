@@ -102,7 +102,14 @@ function formSubmit(e) {
     updateTeamRequest(team).then((status) => {
       console.info("updated", status);
       if (status.success) {
-        window.location.reload();
+        allTeams = [...allTeams];
+        var oldTeam = allTeams.find((t) => t.id === team.id);
+        oldTeam.promotion = team.promotion;
+        oldTeam.members = team.members;
+        oldTeam.name = team.name;
+        oldTeam.url = team.url;
+        showTeams(allTeams);
+        $("#editForm").reset();
       }
     });
   } else {
