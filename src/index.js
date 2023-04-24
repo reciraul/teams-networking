@@ -94,7 +94,17 @@ function formSubmit(e) {
     createTeamRequest(team).then((status) => {
       console.info("status", status);
       if (status.success) {
-        window.location.reload();
+        // v.1
+        // window.location.reload();
+        // v.2
+        // loadTeams(() => {
+        // $("#editForm").reset();
+        // });
+        // v.3
+        team.id = status.id;
+        allTeams.push(team);
+        showTeams(allTeams);
+        $("#editForm").reset();
       }
     });
   }
