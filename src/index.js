@@ -22,14 +22,23 @@ function createTeamRequest(team) {
   }).then((r) => r.json());
 }
 
-function deleteTeamRequest(id) {
+function deleteTeamRequest(id, successDelete) {
   return fetch("http://localhost:3000/teams-json/delete", {
     method: "DELETE",
     headers: {
       "Content-Type": "application/json"
     },
     body: JSON.stringify({ id })
-  }).then((r) => r.json());
+  })
+    .then((r) => r.json())
+    .then((status) => {
+      console.warn("before remove ", status);
+      if (typeof successDelete === "function") {
+        const r = successDelete(status);
+        console.info("raspuns", r);
+      }
+      return status;
+    });
 }
 
 function updateTeamRequest(team) {
@@ -56,7 +65,13 @@ function getTeamAsHTML(team) {
     </tr>`;
 }
 
+let previewDisplayTeams;
 function showTeams(teams) {
+  if (teams === previewDisplayTeams) {
+    console.info("same teams");
+    return;
+  }
+  previewDisplayTeams = teams;
   const html = teams.map(getTeamAsHTML);
   $("table tbody").innerHTML = html.join("");
 }
@@ -102,7 +117,8 @@ function formSubmit(e) {
         // });
         // v.3
         team.id = status.id;
-        allTeams.push(team);
+        // allTeams.push(team);
+        allTeams = [...allTeams, team];
         showTeams(allTeams);
         $("#editForm").reset();
       }
@@ -112,9 +128,15 @@ function formSubmit(e) {
 
 function deleteTeam(id) {
   console.warn("delete", id);
-  deleteTeamRequest(id).then((status) => {
+  deleteTeamRequest(id, (status) => {
+    console.info("callback success", status);
+    return id;
+  }).then((status) => {
     console.warn("status", status);
-    window.location.reload();
+    if (status.success) {
+      //window.location.reload();
+      loadTeams();
+    }
   });
 }
 
@@ -144,9 +166,7 @@ function initEvents() {
   const form = $("#editForm");
   form.addEventListener("submit", formSubmit);
   form.addEventListener("reset", () => {
-    console.warn("reset", editId);
     editId = undefined;
-    console.warn("reset2", editId);
   });
 
   $("#search").addEventListener("input", (e) => {
@@ -167,9 +187,18 @@ function initEvents() {
   });
 }
 
-getTeamsRequest().then((teams) => {
-  allTeams = teams;
-  showTeams(teams);
-});
+function loadTeams(cb) {
+  return getTeamsRequest().then((teams) => {
+    //console.warn(this, window);
+    allTeams = teams;
+    showTeams(teams);
+    if (typeof cb === "function") {
+      cb(teams);
+    }
+    return teams;
+  });
+}
+
+loadTeams();
 
 initEvents();
