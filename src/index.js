@@ -65,12 +65,20 @@ function getTeamAsHTML(team) {
     </tr>`;
 }
 
-let previewDisplayTeams;
+let previewDisplayTeams = [];
 function showTeams(teams) {
   if (teams === previewDisplayTeams) {
     console.info("same teams");
     return;
   }
+  if (teams.length === previewDisplayTeams.length) {
+    var eqContent = teams.every((t, i) => t === previewDisplayTeams[i]);
+    if (true) {
+      console.info("same content");
+      return;
+    }
+  }
+
   previewDisplayTeams = teams;
   const html = teams.map(getTeamAsHTML);
   $("table tbody").innerHTML = html.join("");
@@ -102,12 +110,20 @@ function formSubmit(e) {
     updateTeamRequest(team).then((status) => {
       console.info("updated", status);
       if (status.success) {
-        allTeams = [...allTeams];
-        var oldTeam = allTeams.find((t) => t.id === team.id);
-        oldTeam.promotion = team.promotion;
-        oldTeam.members = team.members;
-        oldTeam.name = team.name;
-        oldTeam.url = team.url;
+        // allTeams = [...allTeams];
+        // var oldTeam = allTeams.find((t) => t.id === team.id);
+        // oldTeam.promotion = team.promotion;
+        // oldTeam.members = team.members;
+        // oldTeam.name = team.name;
+        // oldTeam.url = team.url;
+
+        allTeams = allTeams.map((t) => {
+          if (t.id === team.id) {
+            return team;
+          }
+          return t;
+        });
+
         showTeams(allTeams);
         $("#editForm").reset();
       }
