@@ -1,36 +1,36 @@
 table {
-  width: 100%;
   border-collapse: collapse;
+  width: 100%;
 }
-
 table th,
 table td {
-  border: 1px solid blue;
+  border: 1px solid #29a7e1;
   padding: 5px;
 }
 
 table th {
-  background-color: aquamarine;
-  color: black;
-}
-
-table tr {
-  background-color: aliceblue;
+  background-color: #00aeef;
+  color: white;
 }
 
 table tr:nth-child(even) {
-  background-color: aqua;
+  background-color: #f2f2f2;
+}
+
+table tfoot input[type="text"] {
+  width: 100%;
+}
+table tfoot input:not([type="image" i]) {
+  box-sizing: border-box;
 }
 
 .link-btn {
   cursor: pointer;
-  color: #0099d6;
+  color: #0096d6;
 }
-
 .remove-btn:hover {
   color: #b90303;
 }
-
 .edit-btn:hover {
-  color: #f39903;
+  color: #039903;
 }

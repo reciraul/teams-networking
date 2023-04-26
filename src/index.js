@@ -51,35 +51,39 @@ function updateTeamRequest(team) {
   }).then((r) => r.json());
 }
 
-function getTeamAsHTML(team) {
+function getTeamAsHTML({ id, url, promotion, members, name }) {
+  let displayURL = url;
+  if (url.startsWith("https://")) {
+    displayURL = url.substring(8);
+  }
   return `
-    <tr>
-        <td>${team.promotion}</td>
-        <td>${team.members}</td>
-        <td>${team.name}</td>
-        <td>${team.url}</td>
-        <td>
-          <a data-id="${team.id}" class="link-btn remove-btn">✖</a>   
-          <a data-id="${team.id}" class="link-btn edit-btn">&#9998;</a>
-        </td>
-    </tr>`;
+  <tr>
+    <td>${promotion}</td>
+    <td>${members}</td>
+    <td>${name}</td>
+    <td><a href="${url}" target="_blank">${displayURL}</a></td>
+    <td>
+      <a data-id="${id}" class="link-btn remove-btn">✖</a>
+      <a data-id="${id}" class="link-btn edit-btn">&#9998;</a>
+    </td>
+  </tr>`;
 }
 
-let previewDisplayTeams = [];
+let previewDisplayedTeams = [];
 function showTeams(teams) {
-  if (teams === previewDisplayTeams) {
+  if (teams === previewDisplayedTeams) {
     console.info("same teams");
     return;
   }
-  if (teams.length === previewDisplayTeams.length) {
-    var eqContent = teams.every((t, i) => t === previewDisplayTeams[i]);
-    if (true) {
+  if (teams.length === previewDisplayedTeams.length) {
+    var eqContent = teams.every((t, i) => t === previewDisplayedTeams[i]);
+    if (eqContent) {
       console.info("same content");
       return;
     }
   }
 
-  previewDisplayTeams = teams;
+  previewDisplayedTeams = teams;
   const html = teams.map(getTeamAsHTML);
   $("table tbody").innerHTML = html.join("");
 }
@@ -90,28 +94,35 @@ function $(selector) {
 
 function formSubmit(e) {
   e.preventDefault();
-  // console.warn("submit", e);
+  //console.warn("submit", e);
 
   const promotion = $("#promotion").value;
   const members = $("#members").value;
-  const name = $("#name").value;
-  const url = $("#url").value;
+  const projectName = $("#name").value;
+  const projectURL = $("#url").value;
 
   const team = {
     promotion,
     members,
-    name,
-    url
+    name: projectName,
+    url: projectURL
   };
 
   if (editId) {
     team.id = editId;
-    console.warn("update...", editId, team);
+    console.warn("update...?", editId, team);
     updateTeamRequest(team).then((status) => {
-      console.info("updated", status);
       if (status.success) {
+        //window.location.reload();
+        // TODO clone second level.
+        // loadTeams().then(() => {
+        //   $("#editForm").reset();
+        // });
+        // v3
         // allTeams = [...allTeams];
-        // var oldTeam = allTeams.find((t) => t.id === team.id);
+        // //allTeams = JSON.parse(JSON.stringify(allTeams)); // deep clone
+        // console.info(allTeams.findIndex(t => t.id === team.id));
+        // var oldTeam = allTeams.find(t => t.id === team.id);
         // oldTeam.promotion = team.promotion;
         // oldTeam.members = team.members;
         // oldTeam.name = team.name;
@@ -120,7 +131,7 @@ function formSubmit(e) {
         allTeams = allTeams.map((t) => {
           if (t.id === team.id) {
             return {
-              ...t, // old props;
+              ...t, // old props (eg. createdBy, createdAt)
               ...team
             };
           }
@@ -132,18 +143,17 @@ function formSubmit(e) {
       }
     });
   } else {
-    createTeamRequest(team).then((status) => {
-      console.info("status", status);
-      if (status.success) {
+    createTeamRequest(team).then(({ success, id }) => {
+      if (success) {
         // v.1
         // window.location.reload();
         // v.2
         // loadTeams(() => {
-        // $("#editForm").reset();
+        //   $("#editForm").reset();
         // });
         // v.3
-        team.id = status.id;
-        // allTeams.push(team);
+        team.id = id;
+        //allTeams.push(team);
         allTeams = [...allTeams, team];
         showTeams(allTeams);
         $("#editForm").reset();
@@ -166,14 +176,14 @@ function deleteTeam(id) {
   });
 }
 
-function startEditTeam(id) {
-  editId = id;
-  const team = allTeams.find((team) => team.id === id);
+function startEditTeam(edit) {
+  editId = edit;
+  const { promotion, members, name, url } = allTeams.find(({ id }) => id === edit);
 
-  $("#promotion").value = team.promotion;
-  $("#members").value = team.members;
-  $("#name").value = team.name;
-  $("#url").value = team.url;
+  $("#promotion").value = promotion;
+  $("#members").value = members;
+  $("#name").value = name;
+  $("#url").value = url;
 }
 
 function searchTeams(teams, search) {
@@ -196,6 +206,7 @@ function initEvents() {
   });
 
   $("#search").addEventListener("input", (e) => {
+    //const search = $("#search").value;
     const search = e.target.value;
     console.info("search", search);
     const teams = searchTeams(allTeams, search);
