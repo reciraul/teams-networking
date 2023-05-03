@@ -73,26 +73,29 @@ let previewDisplayedTeams = [];
 function showTeams(teams) {
   if (teams === previewDisplayedTeams) {
     console.info("same teams");
-    return;
+    return false;
   }
   if (teams.length === previewDisplayedTeams.length) {
     var eqContent = teams.every((t, i) => t === previewDisplayedTeams[i]);
     if (eqContent) {
       console.info("same content");
-      return;
+      return false;
     }
   }
 
   previewDisplayedTeams = teams;
   const html = teams.map(getTeamAsHTML);
   $("table tbody").innerHTML = html.join("");
+  return true;
 }
+
+window.showTeams = showTeams;
 
 function $(selector) {
   return document.querySelector(selector);
 }
 
-function formSubmit(e) {
+async function formSubmit(e) {
   e.preventDefault();
   //console.warn("submit", e);
 
@@ -111,69 +114,39 @@ function formSubmit(e) {
   if (editId) {
     team.id = editId;
     console.warn("update...?", editId, team);
-    updateTeamRequest(team).then((status) => {
-      if (status.success) {
-        //window.location.reload();
-        // TODO clone second level.
-        // loadTeams().then(() => {
-        //   $("#editForm").reset();
-        // });
-        // v3
-        // allTeams = [...allTeams];
-        // //allTeams = JSON.parse(JSON.stringify(allTeams)); // deep clone
-        // console.info(allTeams.findIndex(t => t.id === team.id));
-        // var oldTeam = allTeams.find(t => t.id === team.id);
-        // oldTeam.promotion = team.promotion;
-        // oldTeam.members = team.members;
-        // oldTeam.name = team.name;
-        // oldTeam.url = team.url;
-
-        allTeams = allTeams.map((t) => {
-          if (t.id === team.id) {
-            return {
-              ...t, // old props (eg. createdBy, createdAt)
-              ...team
-            };
-          }
-          return t;
-        });
-
-        showTeams(allTeams);
-        $("#editForm").reset();
-      }
-    });
+    const { success } = await updateTeamRequest(team);
+    if (success) {
+      allTeams = allTeams.map((t) => {
+        if (t.id === team.id) {
+          return {
+            ...t, // old props (eg. createdBy, createdAt)
+            ...team
+          };
+        }
+        return t;
+      });
+    }
   } else {
-    createTeamRequest(team).then(({ success, id }) => {
-      if (success) {
-        // v.1
-        // window.location.reload();
-        // v.2
-        // loadTeams(() => {
-        //   $("#editForm").reset();
-        // });
-        // v.3
-        team.id = id;
-        //allTeams.push(team);
-        allTeams = [...allTeams, team];
-        showTeams(allTeams);
-        $("#editForm").reset();
-      }
-    });
+    const { success, id } = await createTeamRequest(team);
+    if (success) {
+      team.id = id;
+      allTeams = [...allTeams, team];
+    }
   }
+
+  // if (showTeams(allTeams)) {
+  //   $("#editForm").reset();
+  // }
+  showTeams(allTeams) && $("#editForm").reset();
 }
 
-function deleteTeam(id) {
+async function deleteTeam(id) {
   console.warn("delete", id);
-  deleteTeamRequest(id, (status) => {
-    console.info("callback success", status);
-    return id;
-  }).then((status) => {
-    console.warn("status", status);
-    if (status.success) {
-      //window.location.reload();
-      loadTeams();
-    }
-  });
+  const { success } = await deleteTeamRequest(id);
+  if (success) {
+    allTeams = allTeams.filter((t) => t.id !== id);
+    showTeams(allTeams);
+  }
 }
 
 function startEditTeam(edit) {
@@ -224,16 +197,15 @@ function initEvents() {
   });
 }
 
-function loadTeams(cb) {
-  return getTeamsRequest().then((teams) => {
-    //console.warn(this, window);
-    allTeams = teams;
-    showTeams(teams);
-    if (typeof cb === "function") {
-      cb(teams);
-    }
-    return teams;
-  });
+async function loadTeams(cb) {
+  const teams = await getTeamsRequest();
+  //console.warn(this, window);
+  allTeams = teams;
+  showTeams(teams);
+  if (typeof cb === "function") {
+    cb(teams);
+  }
+  return teams;
 }
 
 function sleep(ms) {
@@ -244,14 +216,24 @@ function sleep(ms) {
   });
 }
 
-(() => {
-  console.info("start");
+(async () => {
+  $("#editForm").classList.add("loading-mask");
+  await loadTeams();
+  await sleep(100);
+  $("#editForm").classList.remove("loading-mask");
 
-  sleep(3000).then(() => {
-    console.info("ready to do %o", "training!");
-  });
+  console.info("1.start");
+
+  // sleep(4000).then(() => {
+  //   console.info("4.ready to do %o!", "training");
+  // });
+  await sleep(4000);
+  console.info("4.ready to do %o!", "training");
+
+  console.warn("2.after sleep");
+
+  sleep(5000);
+  console.info("3.await sleep");
 })();
-
-loadTeams();
 
 initEvents();
