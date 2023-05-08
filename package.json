@@ -10,21 +10,16 @@
     "build": "webpack --mode production",
     "start": "webpack serve --open"
   },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/reciraul/teams-networking.git"
-  },
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "bugs": {
-    "url": "https://github.com/reciraul/teams-networking/issues"
-  },
-  "homepage": "https://github.com/reciraul/teams-networking#readme",
   "devDependencies": {
     "html-webpack-plugin": "^5.5.0",
     "webpack": "^5.79.0",
     "webpack-cli": "^5.0.1",
     "webpack-dev-server": "^4.13.2"
+  },
+  "dependencies": {
+    "lodash": "^4.17.21"
   }
 }

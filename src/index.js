@@ -1,55 +1,9 @@
+//import debounce from "lodash/debounce";
+import { getTeamsRequest, updateTeamRequest, createTeamRequest, deleteTeamRequest } from "./requests";
+import { $, debounce, sleep } from "./utils";
+
 let allTeams = [];
 var editId;
-
-function getTeamsRequest() {
-  return fetch("http://localhost:3000/teams-json", {
-    method: "GET",
-    headers: {
-      "Content-Type": "application/json"
-    }
-  }).then((r) => {
-    return r.json();
-  });
-}
-
-function createTeamRequest(team) {
-  return fetch("http://localhost:3000/teams-json/create", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json"
-    },
-    body: JSON.stringify(team)
-  }).then((r) => r.json());
-}
-
-function deleteTeamRequest(id, successDelete) {
-  return fetch("http://localhost:3000/teams-json/delete", {
-    method: "DELETE",
-    headers: {
-      "Content-Type": "application/json"
-    },
-    body: JSON.stringify({ id })
-  })
-    .then((r) => r.json())
-    .then((status) => {
-      console.warn("before remove ", status);
-      if (typeof successDelete === "function") {
-        const r = successDelete(status);
-        console.info("raspuns", r);
-      }
-      return status;
-    });
-}
-
-function updateTeamRequest(team) {
-  return fetch("http://localhost:3000/teams-json/update", {
-    method: "PUT",
-    headers: {
-      "Content-Type": "application/json"
-    },
-    body: JSON.stringify(team)
-  }).then((r) => r.json());
-}
 
 function getTeamAsHTML({ id, url, promotion, members, name }) {
   let displayURL = url;
@@ -58,6 +12,9 @@ function getTeamAsHTML({ id, url, promotion, members, name }) {
   }
   return `
   <tr>
+    <td>
+      <input type="checkbox" name="selected" />
+    </td>
     <td>${promotion}</td>
     <td>${members}</td>
     <td>${name}</td>
@@ -92,10 +49,6 @@ function showTeams(teams) {
 
 // TODO remove
 window.showTeams = showTeams;
-
-function $(selector) {
-  return document.querySelector(selector);
-}
 
 async function formSubmit(e) {
   e.preventDefault();
@@ -178,6 +131,14 @@ function searchTeams(teams, search) {
   });
 }
 
+function removeSelected() {
+  console.warn("removeSelected");
+  // find ids...
+  // add mask...
+  // call remove deleteTeamRequest
+  // remove mask
+}
+
 function initEvents() {
   const form = $("#editForm");
   form.addEventListener("submit", formSubmit);
@@ -185,13 +146,18 @@ function initEvents() {
     editId = undefined;
   });
 
-  $("#search").addEventListener("input", (e) => {
-    //const search = $("#search").value;
-    const search = e.target.value;
-    console.info("search", search);
-    const teams = searchTeams(allTeams, search);
-    showTeams(teams);
-  });
+  $("#removeSelected").addEventListener("click", removeSelected);
+
+  $("#search").addEventListener(
+    "input",
+    debounce(function (e) {
+      //const search = $("#search").value;
+      const search = e.target.value;
+      console.info("search", search);
+      const teams = searchTeams(allTeams, search);
+      showTeams(teams);
+    }, 300)
+  );
 
   $("table tbody").addEventListener("click", (e) => {
     if (e.target.matches("a.remove-btn")) {
@@ -215,32 +181,24 @@ async function loadTeams(cb) {
   return teams;
 }
 
-function sleep(ms) {
-  return new Promise((resolve) => {
-    setTimeout(() => {
-      resolve();
-    }, ms);
-  });
-}
-
 (async () => {
   $("#editForm").classList.add("loading-mask");
   await loadTeams();
   await sleep(100);
   $("#editForm").classList.remove("loading-mask");
 
-  console.info("1.start");
+  // console.info("1.start");
 
-  // sleep(4000).then(() => {
-  //   console.info("4.ready to do %o!", "training");
-  // });
-  await sleep(4000);
-  console.info("4.ready to do %o!", "training");
+  // // sleep(4000).then(() => {
+  // //   console.info("4.ready to do %o!", "training");
+  // // });
+  // await sleep(4000);
+  // console.info("4.ready to do %o!", "training");
 
-  console.warn("2.after sleep");
+  // console.warn("2.after sleep");
 
-  sleep(5000);
-  console.info("3.await sleep");
+  // sleep(5000);
+  // console.info("3.await sleep");
 })();
 
 initEvents();
